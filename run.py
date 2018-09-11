@@ -9,9 +9,9 @@ python3 run.py \
              ('forward_looking_priority', 'tiebreak_longest_first'), \
              ('forward_looking_priority', 'tiebreak_random'), \
              ('naive_forward_looking_priority', 'tiebreak_longest_first'), \
-             ('surroundings_50_priority', 'tiebreak_longest_first')," \
-             ('naive_surroundings_50_priority', 'tiebreak_longest_first')," \
-             ('random_priority', 'tiebreak_random')," \
+             ('surroundings_50_priority', 'tiebreak_longest_first'), \
+             ('naive_surroundings_50_priority', 'tiebreak_longest_first'), \
+             ('random_priority', 'tiebreak_random')] \
   --output_results=/tmp/results.bin
 """
 
@@ -43,7 +43,7 @@ _NUM_THREADS = 24
 Arguments = collections.namedtuple('Arguments', [
     'problem', 'communication_radius', 'mode', 'scheme'])
 Arguments.__new__.__defaults__ = (
-    'problems/berlin/problem0',
+    'problems/basic/multi_corridor',
     '30',  # Can be comma-separated.
     'dynamic',
     '("forward_looking_priority", "tiebreak_longest_first")')

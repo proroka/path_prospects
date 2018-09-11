@@ -8,8 +8,8 @@ python3 run.py \
              ('forward_looking_priority', 'tiebreak_longest_first'), \
              ('forward_looking_priority', 'tiebreak_random'), \
              ('naive_forward_looking_priority', 'tiebreak_longest_first'), \
-             ('surroundings_50_priority', 'tiebreak_longest_first')," \
-             ('naive_surroundings_50_priority', 'tiebreak_longest_first')," \
-             ('random_priority', 'tiebreak_random')," \
+             ('surroundings_50_priority', 'tiebreak_longest_first'), \
+             ('naive_surroundings_50_priority', 'tiebreak_longest_first'), \
+             ('random_priority', 'tiebreak_random')]" \
   --output_results=results.bin
-sudo poweroff
+# sudo poweroff

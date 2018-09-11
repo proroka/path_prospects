@@ -29,7 +29,7 @@ class Cell(object):
 
   def quick_allowed(self, environment, size=1):
     return (self.x + size <= environment.shape[0] and self.x >= 0 and
-            self.y + size <= environment.shape[0] and self.y >= 0)
+            self.y + size <= environment.shape[1] and self.y >= 0)
 
   def neighbors(self, environment, size):
     n = []
