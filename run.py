@@ -350,7 +350,8 @@ def run(final_filename, args):
   all_results = collections.defaultdict(list)
   for thread, filename, idx in threads:
     if thread.result() != 0:
-      raise ValueError('Error while running a process.')
+      print('A problem failed. Ignoring it... {}'.format(all_args[idx]))
+      continue
     thread_results = read_results(filename, delete=True)
     all_results[all_args[idx]].append(thread_results)
 

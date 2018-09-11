@@ -200,7 +200,7 @@ class Robot(object):
       ts = [0, 50, 100]
       ncols = 3
       nrows = (len(ts) - 1) // ncols + 1
-      plt.figure(figsize=(6 * 3, 6 * nrows))
+      plt.figure(figsize=(6 * ncols, 6 * nrows))
       for i, t in enumerate(ts):
         if t < len(grid):
           ax = plt.subplot(nrows, ncols, i + 1)
