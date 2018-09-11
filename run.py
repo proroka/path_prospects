@@ -36,7 +36,7 @@ import tqdm
 import robot
 
 _MAX_TIME_FACTOR = 2
-_NUM_THREADS = 24
+_NUM_THREADS = 32
 
 
 # Dimensions that can be varied and their defaults.
