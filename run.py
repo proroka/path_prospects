@@ -60,7 +60,7 @@ def store_results(results, filename):
 
 def read_results(filename, delete=False):
   with open(filename, 'rb') as fp:
-    r = msgpack.unpackb(fp.read(), raw=False)
+    r = msgpack.unpackb(fp.read(), raw=False, use_list=False)
   if delete:
     os.remove(filename)
   return r
@@ -356,11 +356,6 @@ def run(final_filename, args):
 
   all_results = dict(all_results)  # Remove defaultdict.
   store_results(all_results, final_filename)
-
-  for args, results in all_results.items():
-    print('Results for', args)
-    for stats in results:
-      print_stats(Statistics(*stats))
 
 
 if __name__ == '__main__':
