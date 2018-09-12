@@ -165,7 +165,7 @@ class Robot(object):
     # For simplicity allow robot to disappear at goal. Otherwise uncomment.
     # self._draw(environment[len(self.path[self.time_on_path:]):], self.path[-1])
 
-  def plan(self, time_environment, verbose=False):
+  def plan(self, time_environment, verbose=False, show_plots=False):
     if self.arrived:
       return 0.
     # Check if we have new highest priority neighbors with newer plans.

@@ -30,7 +30,6 @@ import subprocess
 import sys
 import tempfile
 import threading
-import toposort
 import tqdm
 
 import robot
@@ -190,17 +189,15 @@ def simulate(robots, environment, radius, ordering, tiebreak=None, verbose=False
         if verbose:
           print('Re-computed priority for robot {} at time {}: {}'.format(r.id, t, r.priority))
 
-    # Find robot ordering (as per communication radius).
-    dependencies = collections.defaultdict(set)
-    for r1 in robots:
-      for r2 in r1.neighbors:
-        if r2.priority < r1.priority:
-          dependencies[r1].add(r2)
-    ordered_robots = toposort.toposort_flatten(dependencies)
+    # Sort the robot to guarantee that robots with higher priorities plan first.
+    # Priorities might not be directly comparable when robots are in different
+    # groups (but sorting still guarantees the correct ordering).
+    ordered_robots = sorted(robots, key=lambda r: r.priority)
+    print('Ordered robots:', ordered_robots)
     # Robots plan in order now.
     time_obstacles = np.tile(environment, [int(current_longest_path_length) * _MAX_TIME_FACTOR, 1, 1])
     for r in ordered_robots:
-      if r.plan(time_obstacles) is None:
+      if r.plan(time_obstacles, verbose=verbose, show_plots=False) is None:
         if verbose:
           print('Impossibility when planning for robot {} at time {}'.format(r.id, t))
         success = False
