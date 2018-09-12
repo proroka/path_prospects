@@ -50,6 +50,12 @@ Arguments.__new__.__defaults__ = (
 Statistics = collections.namedtuple('Statistics', [
     'success', 'ideal_path_lengths', 'path_lengths'])
 
+AggregatedStatistics = collections.namedtuple('AggregatedStatistics', [
+    'success',
+    'ideal_makespan', 'makespan', 'makespan_ratio',
+    'ideal_flowtime', 'flowtime', 'flowtime_ratio',
+    'path_prolongation', 'path_prolongation_ratio'])
+
 
 def store_results(results, filename):
   with open(filename, 'wb') as fp:
@@ -118,16 +124,41 @@ def get_setup_fns(priority_scheme, tiebreak_scheme, static=False):
   return priority_fn, tiebreak_fn
 
 
+def compute_aggregated_statistics(stats):
+  ideal_makespan = np.max(stats.ideal_path_lengths)
+  ideal_flowtime = np.mean(stats.ideal_path_lengths)
+  if stats.success:
+    makespan = np.max(stats.path_lengths)
+    makespan_ratio = (makespan - ideal_makespan) / ideal_makespan
+    flowtime = np.mean(stats.path_lengths)
+    flowtime_ratio = (flowtime - ideal_flowtime) / ideal_flowtime
+    path_prolongation = np.mean(stats.path_lengths - stats.ideal_path_lengths)
+    path_prolongation_ratio = np.mean((stats.path_lengths - stats.ideal_path_lengths) / stats.ideal_path_lengths)
+  else:
+    makespan = None
+    makespan_ratio = None
+    flowtime = None
+    flowtime_ratio = None
+    path_prolongation = None
+    path_prolongation_ratio = None
+  return AggregatedStatistics(
+      success=stats.success,
+      ideal_makespan=ideal_makespan,
+      makespan=makespan,
+      makespan_ratio=makespan_ratio,
+      ideal_flowtime=ideal_flowtime,
+      flowtime=flowtime,
+      flowtime_ratio=flowtime_ratio,
+      path_prolongation=path_prolongation,
+      path_prolongation_ratio=path_prolongation_ratio)
+
+
 def print_stats(stats):
   if stats.success:
-    v = np.max(stats.path_lengths)
-    b = np.max(stats.ideal_path_lengths)
-    print('Makespan: {:.2f} (baseline is {:.2f}) => {:.2f}%'.format(v, b, (v - b) * 100. / b))
-    v = np.mean(stats.path_lengths)
-    b = np.mean(stats.ideal_path_lengths)
-    print('Flowtime: {:.2f} (baseline is {:.2f}) => {:.2f}%'.format(v, b, (v - b) * 100. / b))
-    v = np.mean((stats.path_lengths - stats.ideal_path_lengths) / stats.ideal_path_lengths)
-    print('Prolongation: {:.2f}%'.format(v * 100.))
+    s = compute_aggregated_statistics(stats)
+    print('Makespan: {:.2f} (baseline is {:.2f}) => {:.2f}%'.format(s.makespan, s.ideal_makespan, s.makespan_ratio * 100.))
+    print('Flowtime: {:.2f} (baseline is {:.2f}) => {:.2f}%'.format(s.flowtime, s.ideal_flowtime, s.flowtime_ratio * 100.))
+    print('Prolongation: {:.2f}%'.format(s.path_prolongation_ratio * 100.))
   else:
     print('Failure')
 
@@ -193,7 +224,8 @@ def simulate(robots, environment, radius, ordering, tiebreak=None, verbose=False
     # Priorities might not be directly comparable when robots are in different
     # groups (but sorting still guarantees the correct ordering).
     ordered_robots = sorted(robots, key=lambda r: r.priority)
-    print('Ordered robots:', ordered_robots)
+    if verbose:
+      print('Ordered robots:', ordered_robots)
     # Robots plan in order now.
     time_obstacles = np.tile(environment, [int(current_longest_path_length) * _MAX_TIME_FACTOR, 1, 1])
     for r in ordered_robots:
