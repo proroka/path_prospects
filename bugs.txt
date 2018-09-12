@@ -1,1 +1,12 @@
-No bugs to report at the moment.
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.6/dist-packages/tqdm/_tqdm.py", line 889, in __del__
+    self.close()
+  File "/usr/local/lib/python3.6/dist-packages/tqdm/_tqdm.py", line 1095, in close
+    self._decr_instances(self)
+  File "/usr/local/lib/python3.6/dist-packages/tqdm/_tqdm.py", line 454, in _decr_instances
+    cls.monitor.exit()
+  File "/usr/local/lib/python3.6/dist-packages/tqdm/_monitor.py", line 52, in exit
+    self.join()
+  File "/usr/lib/python3.6/threading.py", line 1053, in join
+    raise RuntimeError("cannot join current thread")
+RuntimeError: cannot join current thread

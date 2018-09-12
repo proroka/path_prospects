@@ -32,7 +32,8 @@ if __name__ == '__main__':
                   tuple(getattr(stats, f) for f in run.AggregatedStatistics._fields))
   df = pd.DataFrame(data, columns=data_columns)
 
-  # Plot makespan.
-  sns.catplot(x='communication_radius', y='flowtime_ratio', hue='scheme', col='problem_set', data=df,
-              kind='bar')
+  # Plots.
+  for y in ('makespan_ratio', 'flowtime_ratio', 'path_prolongation_ratio', 'success'):
+    sns.catplot(x='communication_radius', y=y, hue='scheme', col='problem_set', data=df, kind='bar')
+    plt.title(y)
   plt.show()
