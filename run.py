@@ -21,6 +21,7 @@ import collections
 from concurrent import futures
 import glob
 import itertools
+import matplotlib
 import matplotlib.pylab as plt
 import msgpack
 import msgpack_numpy
@@ -163,19 +164,28 @@ def show_results(stats, robots, environment):
 
     # Show paths that robots took.
     grid = (1 - environment) * 255
-    def robot_color(i, min_value=100, max_value=200):
-      return int((max_value - min_value) * float(i) / len(robots) + min_value)
+    grid = np.tile(grid, [3, 1, 1])
+
+    def colors_from(cmap_name, ncolors):
+      cm = plt.get_cmap(cmap_name)
+      cm_norm = matplotlib.colors.Normalize(vmin=0, vmax=ncolors - 1)
+      scalar_map = matplotlib.cm.ScalarMappable(norm=cm_norm, cmap=cm)
+      return [scalar_map.to_rgba(i) for i in range(ncolors)]
+
+    robot_colors = colors_from('ocean', len(robots))
     for r in robots:
-      r._draw(grid, r.path_taken[0], value=robot_color(r.id))
+      for c in range(3):
+        r._draw(grid[c], r.path_taken[0], value=int(robot_colors[r.id][c] * 255.))
 
     plt.figure()
     ax = plt.subplot(111)
-    ax.matshow(grid.T, cmap='gray')
+    grid = np.transpose(grid, [2, 1, 0])
+    ax.imshow(grid)
     for r in robots:
       xs, ys = zip(*[(p.x, p.y) for p in r.path_taken])
       xs = np.array(xs) + (r.size - 1) / 2.
       ys = np.array(ys) + (r.size - 1) / 2.
-      ax.plot(xs, ys, c=(robot_color(r.id) / 255.,) * 3, lw=2)
+      ax.plot(xs, ys, c=robot_colors[r.id], lw=2)
     plt.tick_params(axis='both', which='both', bottom=False, top=False,
                     labelbottom=False, labeltop=False, left=False, right=False,
                     labelleft=False, labelright=False)
