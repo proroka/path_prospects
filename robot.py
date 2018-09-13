@@ -193,7 +193,7 @@ class Robot(object):
     # Plan.
     cost, path = util.plan(grid, self.current, self.goal, self.distance_to_goal, self.size, soft_grid)
 
-    if verbose:
+    if show_plots:
       self._draw(grid, self.current, value=2)
       self._draw(grid, self.goal, value=2)
       # ts = [0, 10, 20]

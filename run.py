@@ -21,6 +21,7 @@ import collections
 from concurrent import futures
 import glob
 import itertools
+import matplotlib.pylab as plt
 import msgpack
 import msgpack_numpy
 import numpy as np
@@ -43,8 +44,8 @@ Arguments = collections.namedtuple('Arguments', [
     'problem', 'communication_radius', 'mode', 'scheme'])
 Arguments.__new__.__defaults__ = (
     'problems/basic/multi_corridor',
-    '30',  # Can be comma-separated.
-    'dynamic',
+    '50',
+    'static',
     '("forward_looking_priority", "tiebreak_longest_first")')
 
 Statistics = collections.namedtuple('Statistics', [
@@ -153,12 +154,32 @@ def compute_aggregated_statistics(stats):
       path_prolongation_ratio=path_prolongation_ratio)
 
 
-def print_stats(stats):
+def show_results(stats, robots, environment):
   if stats.success:
     s = compute_aggregated_statistics(stats)
     print('Makespan: {:.2f} (baseline is {:.2f}) => {:.2f}%'.format(s.makespan, s.ideal_makespan, s.makespan_ratio * 100.))
     print('Flowtime: {:.2f} (baseline is {:.2f}) => {:.2f}%'.format(s.flowtime, s.ideal_flowtime, s.flowtime_ratio * 100.))
     print('Prolongation: {:.2f}%'.format(s.path_prolongation_ratio * 100.))
+
+    # Show paths that robots took.
+    grid = (1 - environment) * 255
+    def robot_color(i, min_value=100, max_value=200):
+      return int((max_value - min_value) * float(i) / len(robots) + min_value)
+    for r in robots:
+      r._draw(grid, r.path_taken[0], value=robot_color(r.id))
+
+    plt.figure()
+    ax = plt.subplot(111)
+    ax.matshow(grid.T, cmap='gray')
+    for r in robots:
+      xs, ys = zip(*[(p.x, p.y) for p in r.path_taken])
+      xs = np.array(xs) + (r.size - 1) / 2.
+      ys = np.array(ys) + (r.size - 1) / 2.
+      ax.plot(xs, ys, c=(robot_color(r.id) / 255.,) * 3, lw=2)
+    plt.tick_params(axis='both', which='both', bottom=False, top=False,
+                    labelbottom=False, labeltop=False, left=False, right=False,
+                    labelleft=False, labelright=False)
+    plt.show()
   else:
     print('Failure')
 
@@ -224,8 +245,6 @@ def simulate(robots, environment, radius, ordering, tiebreak=None, verbose=False
     # Priorities might not be directly comparable when robots are in different
     # groups (but sorting still guarantees the correct ordering).
     ordered_robots = sorted(robots, key=lambda r: r.priority)
-    if verbose:
-      print('Ordered robots:', ordered_robots)
     # Robots plan in order now.
     time_obstacles = np.tile(environment, [int(current_longest_path_length) * _MAX_TIME_FACTOR, 1, 1])
     for r in ordered_robots:
@@ -273,7 +292,7 @@ def simulate(robots, environment, radius, ordering, tiebreak=None, verbose=False
   minimal_time = np.array(minimal_time, dtype=np.float32)
   stats = Statistics(success, ideal_path_lengths=minimal_time, path_lengths=time_taken)
   if verbose:
-    print_stats(stats)
+    show_results(stats, robots, environment)
   return stats
 
 
