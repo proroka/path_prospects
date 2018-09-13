@@ -29,26 +29,30 @@ _RENAME = {
     'problems/successive_clutter': 'Clutter',
 }
 
+_SCHEMES = [
+    'random_priority+tiebreak_random',
+    'naive_surroundings_50_priority+tiebreak_longest_first',
+    'surroundings_50_priority+tiebreak_longest_first',
+    'longest_priority+tiebreak_random',
+    'naive_forward_looking_priority+tiebreak_longest_first',
+    'forward_looking_priority+tiebreak_random',
+    'forward_looking_priority+tiebreak_longest_first',
+]
+
+_PROBLEMS = [
+    'problems/berlin',
+    'problems/cross',
+    'problems/corridor',
+    'problems/multi_corridor',
+    'problems/successive_clutter',
+]
+
 
 def compute_stats(df, y):
   # col_order = list(sorted(df.problem_set.drop_duplicates().values))
-  col_order = [
-      'problems/berlin',
-      'problems/cross',
-      'problems/corridor',
-      'problems/multi_corridor',
-      'problems/successive_clutter',
-  ]
+  col_order = _PROBLEMS
   # hue_order = list(sorted(df.scheme.drop_duplicates().values))
-  hue_order = [
-      'random_priority+tiebreak_random',
-      'naive_surroundings_50_priority+tiebreak_longest_first',
-      'surroundings_50_priority+tiebreak_longest_first',
-      'longest_priority+tiebreak_random',
-      'naive_forward_looking_priority+tiebreak_longest_first',
-      'forward_looking_priority+tiebreak_random',
-      'forward_looking_priority+tiebreak_longest_first',
-  ]
+  hue_order = _SCHEMES
   order = list(sorted(df.communication_radius.drop_duplicates().values))
   g = sns.catplot(x='communication_radius', y=y, hue='scheme', col='problem_set', data=df, kind='bar', col_order=col_order, hue_order=hue_order, order=order)
 
@@ -123,6 +127,30 @@ def compute_stats(df, y):
   print(latex)
 
 
+def show_ranks(df, y):
+  expected_number = len(_SCHEMES)
+  ranks = collections.defaultdict(lambda: collections.defaultdict(list))
+  for k, g in df.groupby(['problem_set', 'problem_name', 'communication_radius']):
+    successes = g.success.values
+    if not np.all(successes) or len(successes) != expected_number:
+      continue
+    scheme = g.scheme.values
+    rank = g[y].rank(ascending=True, method='min').values
+    for s, r in zip(scheme, rank):
+      ranks[k[0]][s].append(r)
+  data_ranks = []
+  data_ranks_columns = ['problem_set', 'scheme', 'rank']
+  for problem_set, v in ranks.items():
+    for scheme, rank in v.items():
+      for r in rank:
+        data_ranks.append((problem_set, scheme, r))
+  df_ranks = pd.DataFrame(data_ranks, columns=data_ranks_columns)
+  g = sns.catplot(x='problem_set', y='rank', hue='scheme', data=df_ranks, kind='bar', hue_order=_SCHEMES, order=_PROBLEMS)
+  plt.grid(axis='y')
+  plt.title(y)
+  plt.yticks([1, 2, 3, 4])
+
+
 if __name__ == '__main__':
   msgpack_numpy.patch()  # Magic.
 
@@ -150,7 +178,10 @@ if __name__ == '__main__':
   df = pd.DataFrame(data, columns=data_columns)
 
   # Plots.
-  for y in ('makespan_ratio', 'flowtime_ratio', 'success'):
-    compute_stats(df, y)
-    print('')
+  # for y in ('makespan_ratio', 'flowtime_ratio', 'success'):
+  #   compute_stats(df, y)
+  #   print('')
+
+  for y in ('makespan_ratio', 'flowtime_ratio'):
+    show_ranks(df, y)
   plt.show()
