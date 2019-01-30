@@ -41,10 +41,13 @@ _SCHEMES = [
 
 _PROBLEMS = [
     'problems/berlin',
-    'problems/cross',
+    'problems/clutter',
+    # 'problems/cross',
+    'problems/crossing',
     'problems/corridor',
-    'problems/multi_corridor',
-    'problems/successive_clutter',
+    # 'problems/multi_corridor',
+    # 'problems/successive_clutter',
+    'problems/tunnel',
 ]
 
 
@@ -178,9 +181,9 @@ if __name__ == '__main__':
   df = pd.DataFrame(data, columns=data_columns)
 
   # Plots.
-  # for y in ('makespan_ratio', 'flowtime_ratio', 'success'):
-  #   compute_stats(df, y)
-  #   print('')
+  for y in ('makespan_ratio', 'flowtime_ratio', 'success'):
+    compute_stats(df, y)
+    print('')
 
   for y in ('makespan_ratio', 'flowtime_ratio'):
     show_ranks(df, y)
