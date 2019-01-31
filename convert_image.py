@@ -44,11 +44,11 @@ if __name__ == '__main__':
     plt.imshow(image)
     plt.show()
 
-  print('To generate 200 problems, run the following command:')
+  print('To generate 500 problems, run the following command:')
   print('pypy3 ~/Downloads/Others/prioritised_path_planning/scripts/generation/generate_problems_from_environment.py \\\n'
         '  problems/{name} \\\n'
         '  --e {path} \\\n'
-        '  --n 200 --r 10 --sizes \'[1,1,2,2,3,3,4,4,5,5]\' --speeds 1. \\\n'
+        '  --n 500 --r 10 --sizes \'[1,1,2,2,3,3,4,4,5,5]\' --speeds 1. \\\n'
         '  --startranged \'{startx}\' \'{starty}\' \\\n'
         '  --goalranged \'{goalx}\' \'{goaly}\''.format(
             name=name, path=args.output,
