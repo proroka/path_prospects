@@ -10,6 +10,7 @@ import seaborn as sns
 import scipy.stats
 
 import run
+import elopy
 
 _SCHEMES = [
     'random_priority+tiebreak_random',  # Must be first.
@@ -168,12 +169,88 @@ if __name__ == '__main__':
         statistics[problem_set][problem_idx][args.communication_radius][scheme] = stats
 
   # Global statistics.
+  baseline = 'forward_looking_priority+tiebreak_longest_first'
+  win_counts_flowtime = collections.defaultdict(lambda: 0)
+  draw_counts_flowtime = collections.defaultdict(lambda: 0)
+  lose_counts_flowtime = collections.defaultdict(lambda: 0)
+  win_counts_makespan = collections.defaultdict(lambda: 0)
+  draw_counts_makespan = collections.defaultdict(lambda: 0)
+  lose_counts_makespan = collections.defaultdict(lambda: 0)
+
+  elo_flowtime = elopy.Implementation()
+  for s in _SCHEMES:
+    elo_flowtime.addPlayer(s)
+  elo_makespan = elopy.Implementation()
+  for s in _SCHEMES:
+    elo_makespan.addPlayer(s)
+
   data_columns = ['problem_set', 'problem_name', 'scheme', 'flowtime', 'makespan', 'success']
   data = []
   for problem_set in _PROBLEMS:
     for idx in statistics[problem_set]:
       for radius, schemes in statistics[problem_set][idx].items():
+        base_flowtime = schemes[baseline].flowtime
+        base_makespan = schemes[baseline].makespan
+        if base_flowtime is None:
+          base_flowtime = float('inf')
+        if base_makespan is None:
+          base_makespan = float('inf')
+
+        for a, scheme_a in enumerate(_SCHEMES):
+          if scheme_a not in schemes:
+            flowtime_a = float('inf')
+            makespan_a = float('inf')
+          else:
+            flowtime_a = schemes[scheme_a].flowtime
+            makespan_a = schemes[scheme_a].makespan
+            if flowtime_a is None:
+              flowtime_a = float('inf')
+            if makespan_a is None:
+              makespan_a = float('inf')
+          for scheme_b in _SCHEMES[a + 1:]:
+            if scheme_b not in schemes:
+              flowtime_b = float('inf')
+              makespan_b = float('inf')
+            else:
+              flowtime_b = schemes[scheme_b].flowtime
+              makespan_b = schemes[scheme_b].makespan
+              if flowtime_b is None:
+                flowtime_b = float('inf')
+              if makespan_b is None:
+                makespan_b = float('inf')
+            if flowtime_a < flowtime_b:
+              elo_flowtime.recordMatch(scheme_a, scheme_b, winner=scheme_a)
+            elif flowtime_b < flowtime_a:
+              elo_flowtime.recordMatch(scheme_a, scheme_b, winner=scheme_b)
+            else:
+              elo_flowtime.recordMatch(scheme_a, scheme_b, draw=True)
+            if makespan_a < makespan_b:
+              elo_makespan.recordMatch(scheme_a, scheme_b, winner=scheme_a)
+            elif makespan_b < makespan_a:
+              elo_makespan.recordMatch(scheme_a, scheme_b, winner=scheme_b)
+            else:
+              elo_makespan.recordMatch(scheme_a, scheme_b, draw=True)
+
         for scheme, stats in schemes.items():
+          flowtime = stats.flowtime
+          makespan = stats.makespan
+          if flowtime is None:
+            flowtime = float('inf')
+          if makespan is None:
+            makespan = float('inf')
+          if base_flowtime < flowtime:
+            win_counts_flowtime[scheme] += 1
+          elif base_flowtime == flowtime:
+            draw_counts_flowtime[scheme] += 1
+          else:
+            lose_counts_flowtime[scheme] += 1
+          if base_makespan < makespan:
+            win_counts_makespan[scheme] += 1
+          elif base_makespan == makespan:
+            draw_counts_makespan[scheme] += 1
+          else:
+            lose_counts_makespan[scheme] += 1
+
           flowtime_performance = stats.flowtime_ratio
           makespan_performance = stats.makespan_ratio
           success = stats.success
@@ -183,8 +260,55 @@ if __name__ == '__main__':
   # plot_barhist(df, 'flowtime')
   # plot_barhist(df, 'makespan')
   # plot_barhist(df, 'success')
+  # plot_pareto(df, 'flowtime', 'makespan')
 
-  plot_pareto(df, 'flowtime', 'makespan')
+  print('\section{Flowtime}')
+  print('\\begin{tabular}{l|ccc}')
+  print('{\\bf %s opponent} & {\\bf Win rate} & {\\bf Lose rate} & {\\bf Draw rate}\\\\' % rename_scheme(baseline))
+  print('\hline')
+  for scheme in _SCHEMES:
+    w = win_counts_flowtime[scheme]
+    l = lose_counts_flowtime[scheme]
+    d = draw_counts_flowtime[scheme]
+    t = w + l + d
+    print('%s & %.2f\\%% & %.2f\\%% & %.2f\\%% \\\\' % (rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
+  print('\\end{tabular}')
+
+  print('\section{Makespan}')
+  print('\\begin{tabular}{l|ccc}')
+  print('{\\bf %s opponent} & {\\bf Win rate} & {\\bf Lose rate} & {\\bf Draw rate}\\\\' % rename_scheme(baseline))
+  print('\hline')
+  for scheme in _SCHEMES:
+    w = win_counts_makespan[scheme]
+    l = lose_counts_makespan[scheme]
+    d = draw_counts_makespan[scheme]
+    t = w + l + d
+    print('%s & %.2f\\%% & %.2f\\%% & %.2f\\%% \\\\' % (rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
+  print('\\end{tabular}')
+  print()
+
+  print('Flowtime:')
+  for scheme in _SCHEMES:
+    w = win_counts_flowtime[scheme]
+    l = lose_counts_flowtime[scheme]
+    d = draw_counts_flowtime[scheme]
+    t = w + l + d
+    print('  {} vs. {} => W: {:.2f}%, L: {:.2f}%, D: {:.2f}%'.format(
+          rename_scheme(baseline), rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
+  print('Makespan:')
+  for scheme in _SCHEMES:
+    w = win_counts_makespan[scheme]
+    l = lose_counts_makespan[scheme]
+    d = draw_counts_makespan[scheme]
+    t = w + l + d
+    print('  {} vs. {} => W: {:.2f}%, L: {:.2f}%, D: {:.2f}%'.format(
+          rename_scheme(baseline), rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
+  print('ELO ratings (flowtime):')
+  for k, v in elo_flowtime.getRatingList():
+    print('  {}: {:.0f}'.format(rename_scheme(k), v))
+  print('ELO ratings (makespan):')
+  for k, v in elo_makespan.getRatingList():
+    print('  {}: {:.0f}'.format(rename_scheme(k), v))
 
   plt.tight_layout()
   plt.show()
