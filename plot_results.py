@@ -14,6 +14,9 @@ import run
 _RENAME = {
     'random_priority': 'Random',
     'surroundings_50_priority': 'Surroundings',
+    'surroundings_10_priority': 'Surroundings (10)',
+    'surroundings_20_priority': 'Surroundings (20)',
+    'surroundings_30_priority': 'Surroundings (30)',
     'longest_priority': 'Longest first',
     'forward_looking_priority': 'Forwards looking',
     # Naive is moved to the tiebreak row.
@@ -31,8 +34,14 @@ _RENAME = {
 
 _SCHEMES = [
     'random_priority+tiebreak_random',
-    'naive_surroundings_50_priority+tiebreak_longest_first',
-    'surroundings_50_priority+tiebreak_longest_first',
+    # 'naive_surroundings_50_priority+tiebreak_longest_first',
+    # 'surroundings_50_priority+tiebreak_longest_first',
+    # 'naive_surroundings_10_priority+tiebreak_longest_first',
+    # 'surroundings_10_priority+tiebreak_longest_first',
+    # 'naive_surroundings_20_priority+tiebreak_longest_first',
+    # 'surroundings_20_priority+tiebreak_longest_first',
+    'naive_surroundings_30_priority+tiebreak_longest_first',
+    'surroundings_30_priority+tiebreak_longest_first',
     'longest_priority+tiebreak_random',
     'naive_forward_looking_priority+tiebreak_longest_first',
     'forward_looking_priority+tiebreak_random',
@@ -48,6 +57,7 @@ _PROBLEMS = [
     # 'problems/multi_corridor',
     # 'problems/successive_clutter',
     'problems/tunnel',
+    'problems/maze',
 ]
 
 
