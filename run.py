@@ -60,9 +60,10 @@ AggregatedStatistics = collections.namedtuple('AggregatedStatistics', [
 
 
 def store_results(results, filename):
-  with open(filename, 'wb') as fp:
-    buf = msgpack.packb(results, use_bin_type=True)
-    fp.write(buf)
+  if filename:
+    with open(filename, 'wb') as fp:
+      buf = msgpack.packb(results, use_bin_type=True)
+      fp.write(buf)
 
 
 def read_results(filename, delete=False):
@@ -180,7 +181,7 @@ def show_results(stats, robots, environment):
       scalar_map = matplotlib.cm.ScalarMappable(norm=cm_norm, cmap=cm)
       return [scalar_map.to_rgba(i) for i in range(ncolors)]
 
-    robot_colors = colors_from('ocean', len(robots))
+    robot_colors = colors_from('ocean', len(robots) + 1)  # Avoid white.
     for r in robots:
       for c in range(3):
         r._draw(grid[c], r.path_taken[0], value=int(robot_colors[r.id][c] * 255.))
