@@ -68,9 +68,10 @@ def rename_scheme(scheme):
 
 def plot_barhist(df, y):
   plt.rc('font', family='serif')
-  matplotlib.rcParams['ps.useafm'] = True
-  matplotlib.rcParams['pdf.use14corefonts'] = True
-  matplotlib.rcParams['text.usetex'] = True
+  # matplotlib.rcParams['ps.useafm'] = True
+  # matplotlib.rcParams['pdf.use14corefonts'] = True
+  # matplotlib.rcParams['text.usetex'] = True
+  matplotlib.rcParams['pdf.fonttype'] = 42
 
   col_order = _PROBLEMS
   order = [rename_scheme(s) for s in _SCHEMES]
@@ -88,9 +89,11 @@ def plot_barhist(df, y):
 
 def plot_pareto(df, x, y):
   plt.rc('font', family='serif')
-  matplotlib.rcParams['ps.useafm'] = True
-  matplotlib.rcParams['pdf.use14corefonts'] = True
-  matplotlib.rcParams['text.usetex'] = True
+  # matplotlib.rcParams['ps.useafm'] = True
+  # matplotlib.rcParams['pdf.use14corefonts'] = True
+  # matplotlib.rcParams['text.usetex'] = True
+  matplotlib.rcParams['pdf.fonttype'] = 42
+
 
   symbols = {
       'random_priority+tiebreak_random': '<',
