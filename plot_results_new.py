@@ -1,5 +1,6 @@
 import argparse
 import collections
+import matplotlib
 import matplotlib.pylab as plt
 import msgpack
 import msgpack_numpy
@@ -67,6 +68,10 @@ def rename_scheme(scheme):
 
 def plot_barhist(df, y):
   plt.rc('font', family='serif')
+  matplotlib.rcParams['ps.useafm'] = True
+  matplotlib.rcParams['pdf.use14corefonts'] = True
+  matplotlib.rcParams['text.usetex'] = True
+
   col_order = _PROBLEMS
   order = [rename_scheme(s) for s in _SCHEMES]
   g = sns.catplot(x='scheme', y=y, col=None, data=df, kind='bar', col_order=col_order, order=order,
@@ -83,6 +88,9 @@ def plot_barhist(df, y):
 
 def plot_pareto(df, x, y):
   plt.rc('font', family='serif')
+  matplotlib.rcParams['ps.useafm'] = True
+  matplotlib.rcParams['pdf.use14corefonts'] = True
+  matplotlib.rcParams['text.usetex'] = True
 
   symbols = {
       'random_priority+tiebreak_random': '<',
@@ -259,56 +267,56 @@ if __name__ == '__main__':
   df = pd.DataFrame(data, columns=data_columns)
   # plot_barhist(df, 'flowtime')
   # plot_barhist(df, 'makespan')
-  # plot_barhist(df, 'success')
-  # plot_pareto(df, 'flowtime', 'makespan')
+  plot_barhist(df, 'success')
+  plot_pareto(df, 'flowtime', 'makespan')
 
-  print('\section{Flowtime}')
-  print('\\begin{tabular}{l|ccc}')
-  print('{\\bf %s opponent} & {\\bf Win rate} & {\\bf Lose rate} & {\\bf Draw rate}\\\\' % rename_scheme(baseline))
-  print('\hline')
-  for scheme in _SCHEMES:
-    w = win_counts_flowtime[scheme]
-    l = lose_counts_flowtime[scheme]
-    d = draw_counts_flowtime[scheme]
-    t = w + l + d
-    print('%s & %.2f\\%% & %.2f\\%% & %.2f\\%% \\\\' % (rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
-  print('\\end{tabular}')
+  # print('\section{Flowtime}')
+  # print('\\begin{tabular}{l|ccc}')
+  # print('{\\bf %s opponent} & {\\bf Win rate} & {\\bf Lose rate} & {\\bf Draw rate}\\\\' % rename_scheme(baseline))
+  # print('\hline')
+  # for scheme in _SCHEMES:
+  #   w = win_counts_flowtime[scheme]
+  #   l = lose_counts_flowtime[scheme]
+  #   d = draw_counts_flowtime[scheme]
+  #   t = w + l + d
+  #   print('%s & %.2f\\%% & %.2f\\%% & %.2f\\%% \\\\' % (rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
+  # print('\\end{tabular}')
 
-  print('\section{Makespan}')
-  print('\\begin{tabular}{l|ccc}')
-  print('{\\bf %s opponent} & {\\bf Win rate} & {\\bf Lose rate} & {\\bf Draw rate}\\\\' % rename_scheme(baseline))
-  print('\hline')
-  for scheme in _SCHEMES:
-    w = win_counts_makespan[scheme]
-    l = lose_counts_makespan[scheme]
-    d = draw_counts_makespan[scheme]
-    t = w + l + d
-    print('%s & %.2f\\%% & %.2f\\%% & %.2f\\%% \\\\' % (rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
-  print('\\end{tabular}')
-  print()
+  # print('\section{Makespan}')
+  # print('\\begin{tabular}{l|ccc}')
+  # print('{\\bf %s opponent} & {\\bf Win rate} & {\\bf Lose rate} & {\\bf Draw rate}\\\\' % rename_scheme(baseline))
+  # print('\hline')
+  # for scheme in _SCHEMES:
+  #   w = win_counts_makespan[scheme]
+  #   l = lose_counts_makespan[scheme]
+  #   d = draw_counts_makespan[scheme]
+  #   t = w + l + d
+  #   print('%s & %.2f\\%% & %.2f\\%% & %.2f\\%% \\\\' % (rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
+  # print('\\end{tabular}')
+  # print()
 
-  print('Flowtime:')
-  for scheme in _SCHEMES:
-    w = win_counts_flowtime[scheme]
-    l = lose_counts_flowtime[scheme]
-    d = draw_counts_flowtime[scheme]
-    t = w + l + d
-    print('  {} vs. {} => W: {:.2f}%, L: {:.2f}%, D: {:.2f}%'.format(
-          rename_scheme(baseline), rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
-  print('Makespan:')
-  for scheme in _SCHEMES:
-    w = win_counts_makespan[scheme]
-    l = lose_counts_makespan[scheme]
-    d = draw_counts_makespan[scheme]
-    t = w + l + d
-    print('  {} vs. {} => W: {:.2f}%, L: {:.2f}%, D: {:.2f}%'.format(
-          rename_scheme(baseline), rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
-  print('ELO ratings (flowtime):')
-  for k, v in elo_flowtime.getRatingList():
-    print('  {}: {:.0f}'.format(rename_scheme(k), v))
-  print('ELO ratings (makespan):')
-  for k, v in elo_makespan.getRatingList():
-    print('  {}: {:.0f}'.format(rename_scheme(k), v))
+  # print('Flowtime:')
+  # for scheme in _SCHEMES:
+  #   w = win_counts_flowtime[scheme]
+  #   l = lose_counts_flowtime[scheme]
+  #   d = draw_counts_flowtime[scheme]
+  #   t = w + l + d
+  #   print('  {} vs. {} => W: {:.2f}%, L: {:.2f}%, D: {:.2f}%'.format(
+  #         rename_scheme(baseline), rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
+  # print('Makespan:')
+  # for scheme in _SCHEMES:
+  #   w = win_counts_makespan[scheme]
+  #   l = lose_counts_makespan[scheme]
+  #   d = draw_counts_makespan[scheme]
+  #   t = w + l + d
+  #   print('  {} vs. {} => W: {:.2f}%, L: {:.2f}%, D: {:.2f}%'.format(
+  #         rename_scheme(baseline), rename_scheme(scheme), w / t * 100., l / t * 100., d / t * 100.))
+  # print('ELO ratings (flowtime):')
+  # for k, v in elo_flowtime.getRatingList():
+  #   print('  {}: {:.0f}'.format(rename_scheme(k), v))
+  # print('ELO ratings (makespan):')
+  # for k, v in elo_makespan.getRatingList():
+  #   print('  {}: {:.0f}'.format(rename_scheme(k), v))
 
   plt.tight_layout()
   plt.show()
