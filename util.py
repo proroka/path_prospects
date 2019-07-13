@@ -127,7 +127,7 @@ def plan(time_grid, start, goal, distances, size, soft_obstacles):
   def g(v):
     return v[2]
 
-  # Make the heuristic slightly non-preferable (makes things a lot faster).
+  # Make the heuristic slightly non-admissible (makes things a lot faster).
   def h(v):
     return distances[v[0].x, v[0].y] * 1.00001
 
@@ -164,7 +164,7 @@ def plan(time_grid, start, goal, distances, size, soft_obstacles):
     if at_goal(u):
       return g(u), build_path(key(u))
     visited.add(key(u))
-    if len(visited) > time_grid.shape[1] * time_grid.shape[2] * 5:  # Do not go crazy.
+    if len(visited) > time_grid.shape[1] * time_grid.shape[2] * 10:  # Do not go crazy.
       break
     if t + 1 >= time_grid.shape[0]:
       continue
@@ -172,7 +172,7 @@ def plan(time_grid, start, goal, distances, size, soft_obstacles):
       # Check if we are hitting a soft_obstacle.
       added_cost = 0.
       if node_v.hit(soft_obstacles, size):
-        added_cost = 1e-4  # Something really small that can't add up to more than one.
+        added_cost = 1e-5  # Something really small that can't add up to more than one.
       v = (node_v, t + 1, g(u) + 1. + added_cost, key(u))
       q.put((f(v), v))
   return None, None

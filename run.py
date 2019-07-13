@@ -36,8 +36,9 @@ import tqdm
 
 import robot
 
-_MAX_TIME_FACTOR = 2
+_MAX_TIME_FACTOR = 5
 _NUM_THREADS = 32
+_REPLAN_DURATION = 10
 
 
 # Dimensions that can be varied and their defaults.
@@ -221,28 +222,30 @@ def simulate(robots, environment, radius, ordering, tiebreak=None, verbose=False
     # Build neighbors list.
     # The priorities need to be recomputed if neighbors changed.
     priority_changed = False
-    for r1 in robots:
-      for r2 in robots:
-        if r1 <= r2:
-          continue
-        d = np.linalg.norm(r1.center - r2.center)
-        if d <= radius:
-          if r1.add_neighbor(r2):
-            r1.reset_priority()
-            priority_changed = True
-          if r2.add_neighbor(r1):
-            r2.reset_priority()
-            priority_changed = True
-        else:
-          if r1.remove_neighbor(r2):
-            r1.reset_priority()
-            priority_changed = True
-          if r2.remove_neighbor(r1):
-            r2.reset_priority()
-            priority_changed = True
-    if priority_changed:
-      for r in robots:
-        r.reset_priority()
+    # Only reset priority every so often.
+    if t % _REPLAN_DURATION == 0:
+      for r1 in robots:
+        for r2 in robots:
+          if r1 <= r2:
+            continue
+          d = np.linalg.norm(r1.center - r2.center)
+          if d <= radius:
+            if r1.add_neighbor(r2):
+              r1.reset_priority()
+              priority_changed = True
+            if r2.add_neighbor(r1):
+              r2.reset_priority()
+              priority_changed = True
+          else:
+            if r1.remove_neighbor(r2):
+              r1.reset_priority()
+              priority_changed = True
+            if r2.remove_neighbor(r1):
+              r2.reset_priority()
+              priority_changed = True
+      if priority_changed:
+        for r in robots:
+          r.reset_priority()
 
     # Compute priorities if needed.
     # We cheat slightly here by assuming that there was a
@@ -293,12 +296,13 @@ def simulate(robots, environment, radius, ordering, tiebreak=None, verbose=False
           continue
         if r2 <= r1:
           continue
-        if not (r1.current.x >= r2.current.x + r2.size or r1.current.x + r1.size <= r2.current.x or
-                r1.current.y >= r2.current.y + r2.size or r1.current.y + r1.size <= r2.current.y):
-          if verbose:
-            print('Collision detected at time {} between {} and {} :/', t, r1, r2)
-          success = False
-          break
+        # Collisions are already checked during planning. Uncomment for debugging.
+        # if not (r1.current.x >= r2.current.x + r2.size or r1.current.x + r1.size <= r2.current.x or
+        #         r1.current.y >= r2.current.y + r2.size or r1.current.y + r1.size <= r2.current.y):
+        #   if verbose:
+        #     print('Collision detected at time {} between {} and {} :/', t, r1, r2)
+        #   success = False
+        #   break
       if not success:
         break
     if not success:

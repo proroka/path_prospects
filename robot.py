@@ -189,6 +189,8 @@ class Robot(object):
         r.draw(soft_grid)
         continue
       r.draw_path(grid)
+    # Remove robots that might be on top.
+    self.draw(grid, value=0)
 
     # Plan.
     cost, path = util.plan(grid, self.current, self.goal, self.distance_to_goal, self.size, soft_grid)
