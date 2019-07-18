@@ -11,5 +11,5 @@ python3 run.py \
              ('surroundings_30_priority', 'tiebreak_longest_first'), \
              ('naive_surroundings_30_priority', 'tiebreak_longest_first'), \
              ('random_priority', 'tiebreak_random')]" \
-  --output_results=results.bin
+  --output_results=/tmp/results.bin
 # sudo poweroff

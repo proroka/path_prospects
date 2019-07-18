@@ -37,7 +37,7 @@ import tqdm
 import robot
 
 _MAX_TIME_FACTOR = 5
-_NUM_THREADS = 32
+_NUM_THREADS = 16
 _REPLAN_DURATION = 10
 
 

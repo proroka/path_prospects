@@ -48,7 +48,7 @@ class Cell(object):
     return n
 
 
-@nb.jit(nopython=False)
+@nb.jit(nopython=False, forceobj=True)
 def distance_to(grid, destination, size):
   distances = np.ones_like(grid, dtype=np.float32) * float(np.inf)
   visited = set()
@@ -65,7 +65,7 @@ def distance_to(grid, destination, size):
   return distances
 
 
-@nb.jit(nopython=False)
+@nb.jit(nopython=False, forceobj=True)
 def flood(grid, start, value):
   if grid[start.x, start.y] > 0:
     return False
@@ -80,7 +80,7 @@ def flood(grid, start, value):
   return True
 
 
-@nb.jit(nopython=False)
+@nb.jit(nopython=False, forceobj=True)
 def forward(grid, start, distance_to_goal, size, slack=None, limit=None):
   visited = set()
   s = collections.deque([(start, 0.)])
@@ -105,7 +105,7 @@ def forward(grid, start, distance_to_goal, size, slack=None, limit=None):
   return prospect_map
 
 
-@nb.jit(nopython=False)
+@nb.jit(nopython=False, forceobj=True)
 def around(grid, start, distance_to_goal, size, limit):
   visited = set()
   s = collections.deque([(start, 0.)])
